@@ -1,4 +1,4 @@
-import { messagingApi } from "@line/bot-sdk";
+import { messagingApi, validateSignature } from "@line/bot-sdk";
 
 export const getMessagingClient = () => {
   const channelAccessToken = process.env.LINE_CHANNEL_ACCESS_TOKEN;
@@ -9,4 +9,18 @@ export const getMessagingClient = () => {
   return new messagingApi.MessagingApiClient({
     channelAccessToken,
   });
-}
+};
+
+export const verifyLineSignature = (body: string, signature: string | null) => {
+
+    const channelSecret = process.env.LINE_CHANNEL_SECRET;
+  if (!channelSecret) {
+    throw new Error("LINE_CHANNEL_SECRET is not set");
+  }
+
+  if (!signature) {
+    return false;
+  }
+
+  return validateSignature(body, channelSecret, signature);
+};

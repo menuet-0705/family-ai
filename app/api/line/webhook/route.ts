@@ -1,11 +1,23 @@
 import { LineWebhookBody } from "@/app/com/dto/line";
-import { getMessagingClient } from "@/app/com/repos/line-client";
+import { getMessagingClient, verifyLineSignature } from "@/app/com/repos/line-client";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try {
+    const signature = request.headers.get("x-line-signature");
+    const rawBody = await request.text();
 
-    const body = (await request.json()) as LineWebhookBody;
+    if (!verifyLineSignature(rawBody, signature)) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message: "Invalid LINE signature",
+        },
+        { status: 401 },
+      );
+    }
+
+    const body = JSON.parse(rawBody) as LineWebhookBody;
     const client = getMessagingClient();
     const events = body.events ?? [];
 
@@ -30,7 +42,6 @@ export async function POST(request: Request) {
       eventCount: events.length,
     });
   } catch (error) {
-
     console.error("LINE webhook error", error);
     return NextResponse.json(
       {
