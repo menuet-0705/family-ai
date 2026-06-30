@@ -13,7 +13,7 @@ export const getMessagingClient = () => {
 
 export const verifyLineSignature = (body: string, signature: string | null) => {
 
-    const channelSecret = process.env.LINE_CHANNEL_SECRET;
+  const channelSecret = process.env.LINE_CHANNEL_SECRET;
   if (!channelSecret) {
     throw new Error("LINE_CHANNEL_SECRET is not set");
   }

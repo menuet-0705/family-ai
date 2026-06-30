@@ -1,11 +1,16 @@
-import { LineWebhookBody } from "@/app/com/dto/line";
+import {
+  LINE_SIGNATURE_HTTP_HEADER_NAME,
+  messagingApi,
+  webhook,
+} from '@line/bot-sdk'
 import { getMessagingClient, verifyLineSignature } from "@/app/com/repos/line-client";
 import { NextResponse } from "next/server";
+import { receiveFollow, receiveUnFollow } from '@/app/com/service/follow-service';
 
 export async function POST(request: Request) {
   try {
-    const signature = request.headers.get("x-line-signature");
     const rawBody = await request.text();
+    const signature = request.headers.get(LINE_SIGNATURE_HTTP_HEADER_NAME);
 
     if (!verifyLineSignature(rawBody, signature)) {
       return NextResponse.json(
@@ -17,25 +22,10 @@ export async function POST(request: Request) {
       );
     }
 
-    const body = JSON.parse(rawBody) as LineWebhookBody;
-    const client = getMessagingClient();
+    const body: webhook.CallbackRequest = JSON.parse(rawBody);
     const events = body.events ?? [];
 
-    await Promise.all(
-      events
-        .filter((event) => typeof event.replyToken === "string" && event.replyToken.length > 0)
-        .map((event) =>
-          client.replyMessage({
-            replyToken: event.replyToken as string,
-            messages: [
-              {
-                type: "text",
-                text: "メッセージありがとう！",
-              },
-            ],
-          }),
-        ),
-    );
+    await Promise.all([handleWebhookEvent(events)])
 
     return NextResponse.json({
       ok: true,
@@ -50,5 +40,39 @@ export async function POST(request: Request) {
       },
       { status: 500 },
     );
+  }
+}
+
+const handleWebhookEvent = async (events: webhook.Event[]) => {
+  if (!events) {
+    return
+  }
+
+  let client: messagingApi.MessagingApiClient | undefined = undefined;
+  try {
+    client = getMessagingClient();
+    for (const event of events) {
+      switch (event.type) {
+        case 'message':
+          await receiveMessage(client, event)
+          break
+        case 'postback':
+          await receivePostback(client, event)
+          break
+        case 'follow':
+          await receiveFollow(client, event)
+          break
+        case 'unfollow':
+          await receiveUnFollow(client, event)
+          break
+        default: {
+          break
+        }
+      }
+    }
+  } catch (e) {
+    throw e
+  } finally {
+
   }
 }
