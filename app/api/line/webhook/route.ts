@@ -1,4 +1,4 @@
-import { getMessagingClient, verifyLineSignature } from "@/app/com/repos/line-client";
+import { getMessagingClient, verifyLineSignature } from "@/app/com/repos/line-client-repos";
 import { receiveFollow, receiveUnFollow } from '@/app/com/service/follow-service';
 import {
   LINE_SIGNATURE_HTTP_HEADER_NAME,
@@ -63,7 +63,7 @@ const handleWebhookEvent = async (events: webhook.Event[]) => {
           await receiveFollow(client, event)
           break
         case 'unfollow':
-          await receiveUnFollow(client, event)
+          await receiveUnFollow()
           break
         default: {
           break

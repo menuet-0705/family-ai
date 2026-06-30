@@ -1,28 +1,24 @@
 import { messagingApi, webhook } from "@line/bot-sdk"
+import { replyMessage } from "../repos/line-client-repos"
 
-export const receiveFollow = async (client: messagingApi.MessagingApiClient, event: webhook.FollowEvent) => {
+export const receiveFollow = async (
+  client: messagingApi.MessagingApiClient, 
+  event: webhook.FollowEvent
+) => {
   const { replyToken } = event
-  try {
-    const { userId } = event.source
-    if (!userId) {
-      throw new Error('userId is not found.')
-    }
 
-    await replyMessage(client, replyToken, messages)
+  const messages = [
+    {
+      type: 'text',
+      text: [
+        'フォローありがとうございます！',
+      ].join('\n'),
+    } as messagingApi.TextMessage,
+  ]
 
-  } catch (e) {
-    throw e
-  }
+  await replyMessage(client, replyToken, messages)
 }
 
-export const receiveUnFollow = async (client: messagingApi.MessagingApiClient, event: webhook.UnfollowEvent) => {
-  try {
-    const { userId } = event.source
-    if (!userId) {
-      throw new Error('userId is not found.')
-    }
-  } catch (e) {
+export const receiveUnFollow = async () => {
 
-    throw e
-  }
 }
