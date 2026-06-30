@@ -21,8 +21,7 @@ export const receiveUnFollow = async (client: messagingApi.MessagingApiClient, e
     if (!userId) {
       throw new Error('userId is not found.')
     }
-
-} catch (e) {
+  } catch (e) {
 
     throw e
   }

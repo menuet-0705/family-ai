@@ -1,11 +1,11 @@
+import { getMessagingClient, verifyLineSignature } from "@/app/com/repos/line-client";
+import { receiveFollow, receiveUnFollow } from '@/app/com/service/follow-service';
 import {
   LINE_SIGNATURE_HTTP_HEADER_NAME,
   messagingApi,
   webhook,
-} from '@line/bot-sdk'
-import { getMessagingClient, verifyLineSignature } from "@/app/com/repos/line-client";
+} from '@line/bot-sdk';
 import { NextResponse } from "next/server";
-import { receiveFollow, receiveUnFollow } from '@/app/com/service/follow-service';
 
 export async function POST(request: Request) {
   try {
