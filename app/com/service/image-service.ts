@@ -1,7 +1,7 @@
 import { messagingApi, webhook } from "@line/bot-sdk";
 
-export const handleText = async (
-  messageClient: messagingApi.MessagingApiClient,
+export const handleImage = async (
+  messageClient: messagingApi.MessagingApiClient, 
   event: webhook.MessageEvent
 ) => {
 

@@ -38,6 +38,22 @@ export const replyMessage = async (
   })
 }
 
+export const replySimpleMessage = async (
+  messageClient: messagingApi.MessagingApiClient,
+  replyToken: string,
+  message: string
+) => {
+  await messageClient.replyMessage({
+    replyToken: replyToken,
+    messages: [
+      {
+        type: 'text',
+        text: message,
+      },
+    ],
+  })
+}
+
 export const pushSimpleMessage = async (
   messageClient: messagingApi.MessagingApiClient,
   userId: string,
@@ -54,4 +70,16 @@ export const pushSimpleMessage = async (
   }
 
   await messageClient.pushMessage(replyMessage)
+}
+
+export const replyGuidanceMessage = async (
+  messageClient: messagingApi.MessagingApiClient,
+  replyToken: string | null
+) => {
+  // FIXME: ユーザーにわかりやすいメッセージ
+  await replySimpleMessage(
+    messageClient, 
+    replyToken, 
+    '未サポートの処理です。'
+  )
 }

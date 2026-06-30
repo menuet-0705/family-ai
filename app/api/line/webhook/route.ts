@@ -1,5 +1,8 @@
-import { getMessagingClient, verifyLineSignature } from "@/app/com/repos/line-client-repos";
+import { getMessagingClient, replyGuidanceMessage, verifyLineSignature } from "@/app/com/repos/line-client-repos";
 import { receiveFollow, receiveUnFollow } from '@/app/com/service/follow-service';
+import { handleImage } from "@/app/com/service/image-service";
+import { handleText } from "@/app/com/service/message-service";
+import { receivePostback } from "@/app/com/service/postback-service";
 import {
   LINE_SIGNATURE_HTTP_HEADER_NAME,
   messagingApi,
@@ -48,31 +51,57 @@ const handleWebhookEvent = async (events: webhook.Event[]) => {
     return
   }
 
-  let client: messagingApi.MessagingApiClient | undefined = undefined;
-  try {
-    client = getMessagingClient();
-    for (const event of events) {
-      switch (event.type) {
-        case 'message':
-          await receiveMessage(client, event)
-          break
-        case 'postback':
-          await receivePostback(client, event)
-          break
-        case 'follow':
-          await receiveFollow(client, event)
-          break
-        case 'unfollow':
-          await receiveUnFollow()
-          break
-        default: {
-          break
+  const client: messagingApi.MessagingApiClient = getMessagingClient();
+  for (const event of events) {
+    try {
+        switch (event.type) {
+          case 'message':
+            await receiveMessage(client, event)
+            break
+          case 'postback':
+            await receivePostback(client, event)
+            break
+          case 'follow':
+            await receiveFollow(client, event)
+            break
+          case 'unfollow':
+            await receiveUnFollow()
+            break
+          default: {
+            break
+          }
         }
-      }
-    }
-  } catch (e) {
-    throw e
-  } finally {
+    } catch (e) {
+      throw e
+    } finally {
 
+    }
   }
+
+}
+
+const receiveMessage = async (
+  messageClient: messagingApi.MessagingApiClient, 
+  event: webhook.MessageEvent
+) => {
+  const { replyToken } = event
+  if (replyToken) {
+  }
+  
+  switch (event.message.type) {
+    case 'text': {
+      await handleText(messageClient,event)
+      break
+    }
+    case 'image': {
+      await handleImage(messageClient, event)
+      break
+    }
+    default: {
+      // 画像とテキスト以外
+      await replyGuidanceMessage(messageClient, replyToken)
+      break
+    }
+  }
+  
 }
